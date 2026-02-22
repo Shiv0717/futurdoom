@@ -1,151 +1,214 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { 
+  Settings, 
+  Paperclip, 
+  Send, 
+  User, 
+  Waves,
+  Sparkles,
+  HelpCircle,
+  Compass,
+  MessageCircle,
+  Users,
+  CircleDot,
+  Dot
+} from "lucide-react";
 
-export default function ChatBotUI() {
+export default function FuturDoomChat() {
+  const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hello 👋 How can I help you today?" }
+    { id: 1, text: "Welcome to futurDooM Chat!", sender: "bot", time: "10:00 AM" },
+    { id: 2, text: "Hey! How does this work?", sender: "user", time: "10:01 AM" },
+    { id: 3, text: "Just type your message and explore the future of community!", sender: "bot", time: "10:01 AM" },
+    // Adding more messages to demonstrate scrolling
+    { id: 4, text: "This is a longer message to demonstrate how the chat handles multiple messages and scrolling behavior. The input area should stay at the bottom regardless of content.", sender: "user", time: "10:02 AM" },
+    { id: 5, text: "Great question! The futurDooM platform is designed to handle all types of conversations, from short queries to long, detailed discussions about community building and artificial intelligence.", sender: "bot", time: "10:03 AM" },
+    { id: 6, text: "Can you tell me more about the community features?", sender: "user", time: "10:04 AM" },
+    { id: 7, text: "Absolutely! Our community features include real-time discussions, topic-based channels, private messaging, and collaborative spaces where members can share ideas and work together on projects. The intelligence layer helps connect people with similar interests and expertise.", sender: "bot", time: "10:05 AM" },
   ]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [inputMessage, setInputMessage] = useState("");
+  
+  const messagesContainerRef = useRef(null);
+  const inputRef = useRef(null);
+  const shouldAutoScroll = useRef(true);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    // Add user message
-    setMessages([...messages, { role: "user", content: input }]);
-    setInput("");
-    setIsTyping(true);
+  // Handle scroll to maintain position when new messages arrive
+  useEffect(() => {
+    if (!messagesContainerRef.current || !shouldAutoScroll.current) return;
+    
+    const container = messagesContainerRef.current;
+    container.scrollTop = container.scrollHeight;
+  }, [messages]);
 
-    // Simulate response
+  // Detect if user has scrolled up
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    
+    const container = messagesContainerRef.current;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+    shouldAutoScroll.current = isAtBottom;
+  };
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim()) return;
+
+    const newMessage = {
+      id: messages.length + 1,
+      text: inputMessage,
+      sender: "user",
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages([...messages, newMessage]);
+    setInputMessage("");
+
     setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: "assistant", 
-        content: "This is a demo response. In a real implementation, this would connect to your actual API." 
-      }]);
-      setIsTyping(false);
+      const botResponse = {
+        id: messages.length + 2,
+        text: "Thanks for your message! The futurDooM community is growing.",
+        sender: "bot",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, botResponse]);
     }, 1000);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   return (
-    <div className="bg-white border border-gray-200 h-[calc(100vh-6rem)] flex flex-col">
-      
-      {/* Header */}
-      <div className="border-b border-gray-200 px-5 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-pink-400 rounded-lg flex items-center justify-center">
-            <Bot size={18} className="text-white" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-gray-800">Chat Assistant</h2>
-            <p className="text-xs text-gray-400">v4.0 • 8k context</p>
-          </div>
+    <div className=" flex items-center justify-center relative overflow-hiddenfont-sans">
+      <div
+        className={`relative w-full h-[85vh] bg-white/70 backdrop-blur-md rounded-3xl border border-blue-100 shadow-xl shadow-blue-100/40 flex flex-col transition-all duration-700 delay-150 ${
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+        }`}
+      >
+        {/* Decorative dots with Lucide */}
+        <div className="absolute top-5 left-8">
+          <Dot className="w-1.5 h-1.5 text-blue-300 opacity-60" />
         </div>
-        <div className="flex items-center gap-1 text-xs text-gray-400">
-          <Sparkles size={14} className="text-blue-500" />
-          <span>Pro</span>
+        <div className="absolute bottom-6 left-8">
+          <Dot className="w-1.5 h-1.5 text-blue-200 opacity-50" />
         </div>
-      </div>
+        <div className="absolute top-5 right-8">
+          <Dot className="w-1.5 h-1.5 text-blue-200 opacity-50" />
+        </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50">
-        {messages.map((msg, index) => (
-          <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`flex gap-2 max-w-xl ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-              {/* Avatar */}
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                msg.role === "user" 
-                  ? "bg-blue-100" 
-                  : "bg-white border border-gray-200"
-              }`}>
-                {msg.role === "user" 
-                  ? <User size={14} className="text-blue-600" />
-                  : <Bot size={14} className="text-blue-600" />
-                }
-              </div>
-              
-              {/* Message */}
-              <div>
-                <div className={`px-4 py-2.5 text-sm ${
-                  msg.role === "user"
-                    ? "bg-blue-600 text-white rounded-2xl rounded-tr-none"
-                    : "bg-white border border-gray-200 text-gray-700 rounded-2xl rounded-tl-none"
-                }`}>
-                  {msg.content}
-                </div>
-                
-                {/* Message actions (only for assistant) */}
-                {msg.role === "assistant" && index > 0 && (
-                  <div className="flex items-center gap-2 mt-1 ml-1">
-                    <button className="text-gray-300 hover:text-gray-400 transition-colors">
-                      <Copy size={12} />
-                    </button>
-                    <button className="text-gray-300 hover:text-green-500 transition-colors">
-                      <ThumbsUp size={12} />
-                    </button>
-                    <button className="text-gray-300 hover:text-red-500 transition-colors">
-                      <ThumbsDown size={12} />
-                    </button>
-                  </div>
-                )}
-              </div>
+        {/* Chat Header - Fixed height, no shrinking */}
+        <div className="flex-shrink-0 flex items-center gap-3 p-4 border-b border-blue-100">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-white" />
             </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
           </div>
-        ))}
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-800 flex items-center gap-1">
+              futurDooM Community
+              <Sparkles className="w-3 h-3 text-blue-400" />
+            </h3>
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              <CircleDot className="w-1.5 h-1.5 text-green-400 fill-green-400" />
+              128 online now
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button className="p-2 hover:bg-blue-50 rounded-full transition-colors group">
+              <Settings className="w-5 h-5 text-gray-500 group-hover:text-blue-500 transition-colors" />
+            </button>
+          </div>
+        </div>
+
+        {/* Messages Area - Takes all remaining space, scrolls when needed */}
+        <div 
+          ref={messagesContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent min-h-0"
+        >
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+            >
+              {message.sender === "bot" && (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mr-2 flex-shrink-0">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+              )}
+              <div
+                className={`max-w-[70%] ${
+                  message.sender === "user"
+                    ? "bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-2xl rounded-tr-none"
+                    : "bg-white border border-blue-100 text-gray-800 rounded-2xl rounded-tl-none"
+                } p-3 shadow-sm`}
+              >
+                <p className="text-sm break-words">{message.text}</p>
+                <p
+                  className={`text-xs mt-1 flex items-center gap-1 ${
+                    message.sender === "user" ? "text-blue-100" : "text-gray-400"
+                  }`}
+                >
+                  {message.time}
+                  {message.sender === "bot" && <Dot className="w-1 h-1" />}
+                </p>
+              </div>
+              {message.sender === "user" && (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center ml-2 flex-shrink-0">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
         
-        {/* Typing indicator */}
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="flex gap-2">
-              <div className="w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center">
-                <Bot size={14} className="text-blue-600" />
-              </div>
-              <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-none px-5 py-3">
-                <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
-                </div>
-              </div>
-            </div>
+        {/* Input Area - Fixed at bottom, no shrinking */}
+        <form onSubmit={sendMessage} className="flex-shrink-0 p-4 pt-2 border-t border-blue-100">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="p-2 hover:bg-blue-50 rounded-full transition-colors group"
+            >
+              <Paperclip className="w-5 h-5 text-gray-500 group-hover:text-blue-500 transition-colors" />
+            </button>
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 px-4 py-3 bg-white/50 border border-blue-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300/50 focus:border-blue-300 transition-all text-sm"
+            />
+            <button
+              type="submit"
+              className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-300/50 flex items-center justify-center hover:shadow-blue-400/60 hover:scale-105 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!inputMessage.trim()}
+            >
+              <Send className="w-5 h-5 text-white" />
+            </button>
           </div>
-        )}
+        </form>
       </div>
 
-      {/* Input */}
-      <div className="border-t border-gray-200 p-4 bg-white">
-        <div className="flex items-center gap-2 max-w-4xl mx-auto">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask anything..."
-            className="flex-1 border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400 transition-colors"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className={`flex items-center gap-2 px-5 py-2.5  text-sm font-medium transition-colors ${
-              input.trim() 
-                ? "bg-blue-600 text-white hover:bg-blue-700" 
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-            }`}
-          >
-            <Send size={16} />
-            <span>Send</span>
-          </button>
-        </div>
-       
-      </div>
+      
+
+      <style>{`
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #BFDBFE;
+          border-radius: 20px;
+        }
+        .scrollbar-thin::-webkitScrollbar-thumb:hover {
+          background: #93C5FD;
+        }
+      `}</style>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import ChatBotUI from "@/components/home/ChatBotUI";
 
 export default async function Chat() {
   return (
-    <div className="min-h-screen flex max-w-7xl mx-auto">
+    <div className="flex max-w-7xl mx-auto">
       {/* LEFT PROFILE SIDEBAR */}
       <div className="hidden lg:block w-70 ">
         <SidebarProfile />
