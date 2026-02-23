@@ -1,19 +1,25 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import SidebarProfile from "@/components/home/SidebarProfile";
-import ChatBotUI from "@/components/home/ChatBotUI";
+import FuturDoomChat from "@/components/home/ChatBotUI";
 
-export default async function Chat() {
+export default function Chat() {
   return (
-    <div className="flex max-w-7xl mx-auto">
-      {/* LEFT PROFILE SIDEBAR */}
-      <div className="hidden lg:block w-70 ">
-        <SidebarProfile />
-      </div>
+    <div className="min-h-screen bg-[#f0f4ff] overflow-hidden">
+      <div className="max-w-7xl mx-auto h-screen flex gap-6 p-4">
+        {/* LEFT PROFILE SIDEBAR */}
+        <div className="hidden lg:block w-64 flex-shrink-0">
+          <div className="sticky top-4">
+            <SidebarProfile />
+          </div>
+        </div>
 
-      {/* RIGHT CHAT AREA */}
-      <div className="flex-1 px-4 py-4">
-        <ChatBotUI />
+        {/* RIGHT CHAT AREA */}
+        <div className="flex-1 h-full min-h-0">
+          <FuturDoomChat />
+        </div>
       </div>
     </div>
   );
